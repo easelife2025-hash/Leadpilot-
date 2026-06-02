@@ -24,6 +24,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Leads', href: '/dashboard/leads', icon: Database },
+    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ];
 
   return (
