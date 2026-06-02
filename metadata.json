@@ -1,0 +1,6 @@
+{
+  "name": "LeadPilot AI",
+  "description": "A production-ready SaaS for lead management and automated outreach using Gemini AI and WhatsApp Business Cloud API.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
