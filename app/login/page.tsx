@@ -29,6 +29,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     
+    // Bypass auth for preview environments
     if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY.includes('dummy')) {
       setTimeout(() => {
         router.push('/dashboard');
@@ -52,6 +53,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleAuth = async () => {
+    // Bypass auth for preview environments
     if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY.includes('dummy')) {
       router.push('/dashboard');
       return;
@@ -138,6 +140,12 @@ export default function LoginPage() {
             </Button>
           </CardContent>
         </Card>
+        <p className="text-center text-sm text-slate-500 mt-6 font-medium">
+          {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
+          <button onClick={() => setIsLogin(!isLogin)} className="font-bold text-indigo-600 hover:text-indigo-700">
+            {isLogin ? 'Sign up' : 'Sign in'}
+          </button>
+        </p>
       </div>
     </div>
   );

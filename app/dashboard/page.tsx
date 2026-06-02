@@ -4,13 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, MessageSquare, ArrowUpRight, Zap, Play } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/components/auth-provider';
 
 export default function DashboardOverview() {
+  const { user } = useAuth();
+  
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
         <h1 className="text-3xl font-display font-bold text-slate-900 tracking-tight">Overview</h1>
-        <p className="text-slate-500 font-medium mt-1">Welcome back</p>
+        <p className="text-slate-500 font-medium mt-1">Welcome back, {user?.email?.split('@')[0] || 'User'}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -88,6 +91,7 @@ export default function DashboardOverview() {
          </Card>
 
          <Card className="border-transparent bg-gradient-to-br from-indigo-600 to-sky-600 text-white relative overflow-hidden shadow-lg shadow-indigo-600/20">
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
             <CardContent className="p-8 relative z-10 h-full flex flex-col justify-between">
                <div>
                  <div className="inline-flex items-center bg-white/20 px-3 py-1 rounded-full text-xs font-bold mb-4">

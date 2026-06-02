@@ -24,11 +24,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Leads', href: '/dashboard/leads', icon: Database },
+    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ];
 
   return (
     <RequireAuth>
       <div className="min-h-screen flex bg-slate-50 text-slate-900">
+        {/* Sidebar */}
         <aside className="w-64 border-r border-slate-200 bg-white/50 backdrop-blur-xl flex flex-col hidden md:flex sticky top-0 h-screen">
           <div className="p-6 flex items-center font-display font-bold text-xl text-slate-900">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-sky-400 flex items-center justify-center mr-3 shadow-md shadow-indigo-500/20">
@@ -67,7 +69,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </aside>
 
+        {/* Main Content */}
         <main className="flex-1 flex flex-col overflow-x-hidden min-h-screen relative">
+          <div className="pointer-events-none fixed inset-0 z-[-1] opacity-50">
+            <div className="absolute top-[5%] left-[20%] w-[30%] h-[30%] rounded-full bg-indigo-200/20 blur-[100px]" />
+          </div>
+          
+          {/* Mobile Header */}
           <header className="md:hidden h-16 border-b border-slate-200 bg-white/70 backdrop-blur-md flex items-center justify-between px-4 z-10 sticky top-0">
             <div className="flex items-center font-display font-bold text-lg text-slate-900">
               <div className="w-6 h-6 rounded-md bg-gradient-to-tr from-indigo-600 to-sky-400 flex items-center justify-center mr-2">

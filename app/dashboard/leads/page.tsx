@@ -45,6 +45,8 @@ export default function LeadsPage() {
     
     setSending(true);
     try {
+      // In a real app, this posts to Firebase or our Whatsapp API Node Route
+      // For this prototype, simulate network delay
       const res = await fetch('/api/whatsapp/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -128,6 +130,7 @@ export default function LeadsPage() {
         </Card>
 
         <Card className="border-indigo-100 shadow-lg shadow-indigo-100/50 bg-white/90 backdrop-blur-xl relative overflow-hidden">
+          {/* Subtle glow */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[80px] pointer-events-none" />
           
           <CardHeader>
