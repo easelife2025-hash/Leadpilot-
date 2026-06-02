@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
 import { 
   MessageSquare, Zap, Users, ArrowRight, ShieldCheck, Sparkles, 
   CheckCircle2, Play, BarChart3, Clock, Smartphone, ChevronDown, Check
@@ -96,8 +97,12 @@ export default function Home() {
             <a href="#how-it-works" className="hover:text-indigo-600 transition-colors">How it works</a>
             <a href="#pricing" className="hover:text-indigo-600 transition-colors">Pricing</a>
           </div>
-          <Button variant="ghost" className="font-semibold hidden sm:inline-flex">Sign In</Button>
-          <Button variant="default" className="font-semibold shadow-indigo-500/25">Get Started</Button>
+          <Link href="/login">
+            <Button variant="ghost" className="font-semibold hidden sm:inline-flex">Sign In</Button>
+          </Link>
+          <Link href="/login">
+            <Button variant="default" className="font-semibold shadow-indigo-500/25">Get Started</Button>
+          </Link>
         </nav>
       </header>
 
@@ -130,14 +135,18 @@ export default function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-lg font-semibold rounded-2xl group">
-                Start Free Trial
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button size="lg" variant="glass" className="w-full sm:w-auto h-14 px-8 text-lg font-semibold rounded-2xl group">
-                <Play className="w-5 h-5 mr-2 text-indigo-600 group-hover:scale-110 transition-transform" />
-                See how it works
-              </Button>
+              <Link href="/login" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full h-14 px-8 text-lg font-semibold rounded-2xl group">
+                  Start Free Trial
+                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <Link href="#how-it-works" className="w-full sm:w-auto">
+                <Button size="lg" variant="glass" className="w-full h-14 px-8 text-lg font-semibold rounded-2xl group">
+                  <Play className="w-5 h-5 mr-2 text-indigo-600 group-hover:scale-110 transition-transform" />
+                  See how it works
+                </Button>
+              </Link>
             </div>
             <div className="flex items-center justify-center gap-6 mt-12 text-sm text-slate-500 font-medium">
               <span className="flex items-center"><ShieldCheck className="w-4 h-4 mr-2 text-emerald-500" /> No credit card required</span>
@@ -354,7 +363,9 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-                <Button className="w-full h-12 text-md font-bold rounded-xl" variant="outline">Start 14-day Free Trial</Button>
+                <Link href="/login">
+                  <Button className="w-full h-12 text-md font-bold rounded-xl" variant="outline">Start 14-day Free Trial</Button>
+                </Link>
               </CardContent>
             </Card>
             
@@ -378,7 +389,9 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-                <Button className="w-full h-12 text-md font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700">Get Started Now</Button>
+                <Link href="/login">
+                  <Button className="w-full h-12 text-md font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700">Get Started Now</Button>
+                </Link>
               </CardContent>
             </Card>
           </div>
@@ -417,9 +430,11 @@ export default function Home() {
             <div className="relative z-10">
               <h2 className="text-4xl md:text-6xl font-display font-extrabold mb-6 tracking-tighter">Ready to scale your outreach?</h2>
               <p className="text-xl text-indigo-100 font-medium mb-12 max-w-2xl mx-auto">Join hundreds of modern sales teams automating their WhatsApp workflows with LeadPilot AI.</p>
-              <Button size="lg" className="h-14 px-10 text-lg font-bold rounded-2xl bg-white text-indigo-600 hover:bg-slate-50 shadow-xl shadow-indigo-900/20">
-                Start your 14-day free trial
-              </Button>
+              <Link href="/login">
+                <Button size="lg" className="h-14 px-10 text-lg font-bold rounded-2xl bg-white text-indigo-600 hover:bg-slate-50 shadow-xl shadow-indigo-900/20">
+                  Start your 14-day free trial
+                </Button>
+              </Link>
               <p className="mt-8 text-indigo-200 text-sm font-medium">No credit card required. Setup takes 5 minutes.</p>
             </div>
           </motion.div>
