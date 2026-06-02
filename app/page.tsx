@@ -1,84 +1,100 @@
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Zap, Users, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
+import { MessageSquare, Zap, Users, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
 import * as motion from "motion/react-client";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="px-6 h-16 flex items-center justify-between border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="flex justify-center items-center font-display font-bold text-xl text-indigo-700">
-          <MessageSquare className="w-6 h-6 mr-2" />
+      <header className="px-8 h-20 flex items-center justify-between z-50">
+        <div className="flex justify-center items-center font-display font-bold text-2xl text-slate-900 tracking-tight">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-400 flex items-center justify-center mr-3 shadow-lg shadow-indigo-500/30">
+            <MessageSquare className="w-5 h-5 text-white" />
+          </div>
           LeadPilot AI
         </div>
         <nav className="flex items-center gap-4">
-          <Link href="/login">
-            <Button variant="ghost" className="text-slate-600">Login</Button>
-          </Link>
-          <Link href="/login">
-            <Button>Get Started</Button>
-          </Link>
+          <Button variant="ghost" className="font-medium hidden sm:inline-flex">Sign In</Button>
+          <Button variant="glass" className="font-semibold">Get Started</Button>
         </nav>
       </header>
 
-      <main className="flex-1 flex flex-col pt-24 pb-16 items-center px-4">
+      <main className="flex-1 flex flex-col pt-24 pb-20 items-center px-6 relative">
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-3xl text-center"
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="max-w-4xl text-center z-10"
         >
-          <span className="inline-block py-1 px-3 rounded-full bg-indigo-50 text-indigo-700 text-sm font-medium mb-6">
-            Intelligent WhatsApp Automation
-          </span>
-          <h1 className="text-5xl md:text-6xl font-display font-bold text-slate-900 tracking-tight leading-tight mb-6">
-            Turn Leads into Customers with AI Outreach
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 py-2 px-4 rounded-full bg-white/60 backdrop-blur-md border border-white/80 shadow-sm text-indigo-700 text-sm font-semibold mb-8"
+          >
+            <Sparkles className="w-4 h-4 text-emerald-500" />
+            <span>Next-Gen WhatsApp Automation</span>
+          </motion.div>
+          
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-display font-extrabold tracking-tighter text-slate-900 mb-8 leading-[1.1]">
+            Turn leads into <span className="text-gradient bg-gradient-to-r from-indigo-500 via-sky-500 to-emerald-500">pipeline.</span>
           </h1>
-          <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
-            LeadPilot AI automatically syncs your leads, generates hyper-personalized WhatsApp messages using Gemini AI, and drives conversions on autopilot.
+          
+          <p className="text-lg md:text-xl text-slate-600 mb-12 max-w-2xl mx-auto font-medium leading-relaxed">
+            LeadPilot automatically syncs your leads, generates hyper-personalized WhatsApp messages using Gemini AI, and drives conversions on autopilot.
           </p>
-          <div className="flex items-center justify-center gap-4">
-            <Link href="/login">
-              <Button size="lg" className="h-12 px-8 text-base">
-                Start Free Trial
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-lg font-semibold rounded-2xl group">
+              Start Free Trial
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+            <Button size="lg" variant="glass" className="w-full sm:w-auto h-14 px-8 text-lg font-semibold rounded-2xl">
+              View Demo
+            </Button>
+          </div>
+          <div className="flex items-center justify-center gap-6 mt-12 text-sm text-slate-500 font-medium">
+            <span className="flex items-center"><ShieldCheck className="w-4 h-4 mr-2 text-emerald-500" /> No credit card required</span>
+            <span className="flex items-center"><ShieldCheck className="w-4 h-4 mr-2 text-emerald-500" /> Cancel anytime</span>
           </div>
         </motion.div>
 
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto w-full"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+          className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto w-full z-10"
         >
-          <div className="p-8 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center mb-6">
-              <Users className="w-6 h-6" />
-            </div>
-            <h3 className="text-xl font-display font-bold text-slate-900 mb-2">Lead Management</h3>
-            <p className="text-slate-600">Centralize all your prospect data in our scalable CRM powered by Firebase. Never lose a lead again.</p>
-          </div>
-          <div className="p-8 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center mb-6">
-              <Zap className="w-6 h-6" />
-            </div>
-            <h3 className="text-xl font-display font-bold text-slate-900 mb-2">Gemini AI Engine</h3>
-            <p className="text-slate-600">Draft context-aware, highly personalized outreach messages instantly using Google's Gemini models.</p>
-          </div>
-          <div className="p-8 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center mb-6">
-              <MessageSquare className="w-6 h-6" />
-            </div>
-            <h3 className="text-xl font-display font-bold text-slate-900 mb-2">WhatsApp native</h3>
-            <p className="text-slate-600">Automate engagement natively through the WhatsApp Business Cloud API. High open and reply rates.</p>
-          </div>
+          <Card className="hover:-translate-y-2 transition-transform duration-500">
+            <CardContent className="p-8">
+              <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mb-6 shadow-inner">
+                <Users className="w-7 h-7 text-indigo-600" />
+              </div>
+              <h3 className="text-2xl font-display font-bold text-slate-900 mb-3">Smart CRM Sync</h3>
+              <p className="text-slate-600 leading-relaxed font-medium">Instantly centralize all your prospect data into our scalable Firebase-backed system. Never drop a lead again.</p>
+            </CardContent>
+          </Card>
+          <Card className="hover:-translate-y-2 transition-transform duration-500 delay-100 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-sky-50/40 pointer-events-none" />
+            <CardContent className="p-8 relative">
+              <div className="w-14 h-14 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center mb-6 shadow-inner">
+                <Zap className="w-7 h-7 text-sky-500" />
+              </div>
+              <h3 className="text-2xl font-display font-bold text-slate-900 mb-3">Gemini Engine</h3>
+              <p className="text-slate-600 leading-relaxed font-medium">Draft highly personalized, context-aware outreach instantly using state-of-the-art Google AI models.</p>
+            </CardContent>
+          </Card>
+          <Card className="hover:-translate-y-2 transition-transform duration-500 delay-200">
+            <CardContent className="p-8">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mb-6 shadow-inner">
+                <MessageSquare className="w-7 h-7 text-emerald-500" />
+              </div>
+              <h3 className="text-2xl font-display font-bold text-slate-900 mb-3">Native WhatsApp</h3>
+              <p className="text-slate-600 leading-relaxed font-medium">Automate engagement natively through the Meta Cloud API to ensure delivery, compliance, and maximum reply rates.</p>
+            </CardContent>
+          </Card>
         </motion.div>
       </main>
-      
-      <footer className="py-8 text-center text-slate-500 border-t border-slate-200">
-        <p>&copy; {new Date().getFullYear()} LeadPilot AI. Crafted for AI Studio.</p>
-      </footer>
     </div>
   );
 }
