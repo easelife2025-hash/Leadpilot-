@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -120,7 +120,7 @@ export default function OnboardingPage() {
     }, 1200);
   };
 
-  const slideVariants = {
+  const slideVariants: any = {
     hidden: (direction: number) => ({
       x: direction > 0 ? 40 : -40,
       opacity: 0,
