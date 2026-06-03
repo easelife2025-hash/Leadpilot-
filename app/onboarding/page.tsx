@@ -47,11 +47,13 @@ export default function OnboardingPage() {
   useEffect(() => {
     // Check local storage for connection state
     const connected = localStorage.getItem('whatsapp_connected') === 'true';
-    if (connected && currentStep === 2) {
+    // Only auto-forward if we are moving forwards (direction > 0)
+    // This prevents the "Back" button from getting stuck
+    if (connected && currentStep === 2 && direction > 0) {
       setIsConnected(true);
       handleNext(3);
     }
-  }, [currentStep]);
+  }, [currentStep, direction]);
 
   const handleNext = (targetStep: number) => {
     setDirection(targetStep > currentStep ? 1 : -1);
