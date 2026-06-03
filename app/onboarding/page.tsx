@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CheckCircle2, Link as LinkIcon, RefreshCw, MessageSquare, Play, UploadCloud, Smartphone, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { CheckCircle2, Link as LinkIcon, RefreshCw, MessageSquare, Play, UploadCloud, Smartphone, ArrowRight, ArrowLeft, ShieldCheck, Zap } from 'lucide-react';
 import { useAuth } from '@/components/auth-provider';
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
@@ -278,9 +278,14 @@ export default function OnboardingPage() {
                       <LinkIcon className="w-5 h-5 mr-2" />
                       Connect via Facebook
                    </Button>
-                   <button onClick={() => handleNext(3)} className="text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors">
-                     Skip for now (Preview)
-                   </button>
+                   <div className="flex items-center justify-between w-full mt-2">
+                     <button onClick={() => handleNext(1)} className="flex items-center text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors">
+                       <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                     </button>
+                     <button onClick={() => handleNext(3)} className="text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors">
+                       Skip for now (Preview)
+                     </button>
+                   </div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -326,6 +331,11 @@ export default function OnboardingPage() {
                         'Verify Number'
                       )}
                    </Button>
+                   <div className="flex justify-start w-full mt-2">
+                     <button onClick={() => handleNext(2)} className="flex items-center text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors">
+                       <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                     </button>
+                   </div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -367,6 +377,14 @@ export default function OnboardingPage() {
                         <> Launch Dashboard <ArrowRight className="w-5 h-5 ml-2" /> </>
                       )}
                    </Button>
+                   <div className="flex items-center justify-between w-full mt-2">
+                     <button onClick={() => handleNext(3)} disabled={isUploading} className="flex items-center text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50">
+                       <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                     </button>
+                     <button onClick={finishOnboarding} disabled={isUploading} className="text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50">
+                       Skip for now
+                     </button>
+                   </div>
                 </CardContent>
               </Card>
             </motion.div>
