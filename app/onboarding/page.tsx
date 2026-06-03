@@ -24,6 +24,7 @@ export default function OnboardingPage() {
   const { user, loading } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [direction, setDirection] = useState(1);
+  const [hasInitializedUrl, setHasInitializedUrl] = useState(false);
   
   // Auth state
   const [isLogin, setIsLogin] = useState(false);
@@ -36,15 +37,37 @@ export default function OnboardingPage() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && !hasInitializedUrl) {
+      const params = new URLSearchParams(window.location.search);
+      const stepParam = params.get('step');
+      if (stepParam) {
+        const s = Number(stepParam);
+        if (s >= 1 && s <= 4) {
+          setCurrentStep(s);
+          setHasInitializedUrl(true);
+          window.history.replaceState({}, '', '/onboarding');
+          return;
+        }
+      }
+      setHasInitializedUrl(true);
+    }
+  }, [hasInitializedUrl]);
+
+  useEffect(() => {
+    if (!hasInitializedUrl) return;
+
     // Check if user is already logged in
     if (!loading && user && currentStep === 1) {
       handleNext(2);
     }
-  }, [user, loading, currentStep]);
+  }, [user, loading, currentStep, hasInitializedUrl]);
 
   useEffect(() => {
+    if (!hasInitializedUrl) return;
+
     // Check local storage for connection state
     const connected = localStorage.getItem('whatsapp_connected') === 'true';
     // Only auto-forward if we are moving forwards (direction > 0)
@@ -53,7 +76,7 @@ export default function OnboardingPage() {
       setIsConnected(true);
       handleNext(3);
     }
-  }, [currentStep, direction]);
+  }, [currentStep, direction, hasInitializedUrl]);
 
   const handleNext = (targetStep: number) => {
     setDirection(targetStep > currentStep ? 1 : -1);
@@ -102,6 +125,7 @@ export default function OnboardingPage() {
   };
 
   const connectWhatsApp = () => {
+    setIsConnecting(true);
     localStorage.setItem('whatsapp_connected', 'true');
     window.location.href = '/api/whatsapp/auth?redirect=/onboarding?step=3';
   };
@@ -276,9 +300,15 @@ export default function OnboardingPage() {
                         <li>Company legal details</li>
                      </ul>
                    </div>
-                   <Button onClick={connectWhatsApp} className="w-full font-bold h-12 text-base bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20">
-                      <LinkIcon className="w-5 h-5 mr-2" />
-                      Connect via Facebook
+                   <Button onClick={connectWhatsApp} disabled={isConnecting} className="w-full font-bold h-12 text-base bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20">
+                      {isConnecting ? (
+                        <> <RefreshCw className="w-5 h-5 mr-2 animate-spin" /> Connecting... </>
+                      ) : (
+                        <>
+                          <LinkIcon className="w-5 h-5 mr-2" />
+                          Connect via Facebook
+                        </>
+                      )}
                    </Button>
                    <div className="flex items-center justify-between w-full mt-2">
                      <button onClick={() => handleNext(1)} className="flex items-center text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors">
