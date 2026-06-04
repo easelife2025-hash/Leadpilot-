@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import { 
   MessageSquare, Users, Settings, LogOut, BarChart3, 
   UploadCloud, Flame, Clock, DollarSign, Activity, 
-  ArrowRight, Sparkles, TrendingUp, CheckCircle2 
+  ArrowRight, Sparkles, TrendingUp, CheckCircle2, Zap
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy, limit, Timestamp } from 'firebase/firestore';
@@ -75,18 +76,18 @@ export default function DashboardPage() {
         </div>
         
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          <button className="flex items-center w-full px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg font-medium">
+          <Link href="/dashboard" className="flex items-center w-full px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg font-medium">
             <BarChart3 className="w-5 h-5 mr-3" />
             Overview
-          </button>
-          <button className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
+          </Link>
+          <Link href="/leads" className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
             <Users className="w-5 h-5 mr-3" />
             Leads
-          </button>
-          <button className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
-            <MessageSquare className="w-5 h-5 mr-3" />
+          </Link>
+          <Link href="/campaigns" className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
+            <Zap className="w-5 h-5 mr-3" />
             Campaigns
-          </button>
+          </Link>
           <button className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
             <Settings className="w-5 h-5 mr-3" />
             Settings
