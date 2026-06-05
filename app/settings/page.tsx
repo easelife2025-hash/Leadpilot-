@@ -182,7 +182,22 @@ function WhatsAppSettings() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg text-sm text-blue-900">
+        <div className="font-semibold flex items-center gap-2 mb-2">
+          <AlertCircle className="w-4 h-4" />
+          Required Meta App Configuration
+        </div>
+        <div className="space-y-2 opacity-90">
+          <p>Before connecting, please configure the following in your <a href="https://developers.facebook.com/apps/" target="_blank" rel="noreferrer" className="underline font-medium hover:text-blue-800">Meta App Dashboard</a>:</p>
+          <ul className="list-disc pl-5 space-y-1">
+             <li>Navigate to <b>App Settings &gt; Basic</b> and add <code className="bg-blue-100 px-1 py-0.5 rounded text-blue-800 select-all">{typeof window !== 'undefined' ? window.location.origin : 'https://leadpilot.app'}</code> to <b>App Domains</b>.</li>
+             <li>Navigate to <b>Facebook Login &gt; Settings</b> and toggle <b>Login with the JavaScript SDK</b> to <b>Yes</b>.</li>
+             <li>Under the same section, add the exact same domain URL above to <b>Allowed Domains for the JavaScript SDK</b> list.</li>
+          </ul>
+        </div>
+      </div>
+
       <div className="bg-slate-50 border border-slate-200 p-6 rounded-xl flex flex-col items-center justify-center text-center">
         <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
           <Smartphone className="w-8 h-8" />
