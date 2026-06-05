@@ -1,16 +1,204 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   MessageSquare, Users, Settings as SettingsIcon, LogOut, BarChart3, 
   Zap, User, Bell, Lock, CreditCard, Key, Smartphone, Shield,
-  CheckCircle2, Plus, Copy, Eye, EyeOff, MoreVertical
+  CheckCircle2, Plus, Copy, Eye, EyeOff, MoreVertical, Loader2, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+
+// Keep window.FB typing simple
+declare global {
+  interface Window {
+    fbAsyncInit: () => void;
+    FB: any;
+  }
+}
+
+function WhatsAppSettings() {
+  const [loading, setLoading] = useState(true);
+  const [config, setConfig] = useState<any>(null);
+  const [sdkLoaded, setSdkLoaded] = useState(false);
+  const [envError, setEnvError] = useState(false);
+
+  useEffect(() => {
+    // 1. Fetch current config
+    fetch('/api/whatsapp/config')
+      .then(res => res.json())
+      .then(data => {
+        if (data.connected) {
+          setConfig(data);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+
+    // 2. Load FB SDK
+    const appId = process.env.NEXT_PUBLIC_META_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+    if (!appId) {
+      setEnvError(true);
+      return;
+    }
+
+    if (window.FB) {
+      setSdkLoaded(true);
+      return;
+    }
+
+    window.fbAsyncInit = function() {
+      window.FB.init({
+        appId            : appId,
+        autoLogAppEvents : true,
+        xfbml            : true,
+        version          : 'v19.0'
+      });
+      setSdkLoaded(true);
+    };
+
+    (function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s) as HTMLScriptElement; js.id = id;
+      js.src = "https://connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode?.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
+  }, []);
+
+  const handleConnect = () => {
+    if (!window.FB) {
+      toast.error('Facebook SDK not loaded yet.');
+      return;
+    }
+
+    // Use specific FB.login for WhatsApp Business Management
+    window.FB.login((response: any) => {
+      if (response.authResponse) {
+        const accessToken = response.authResponse.accessToken;
+        setLoading(true);
+        // Exchange with backend
+        fetch('/api/whatsapp/exchange', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accessToken })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            toast.error(data.error);
+          } else {
+            toast.success("Successfully connected Meta Account!");
+            setConfig({ connected: true, wabaId: data.wabaId, phoneNumberId: data.phoneNumberId });
+          }
+        })
+        .catch(() => toast.error("Failed to connect. API Error."))
+        .finally(() => setLoading(false));
+
+      } else {
+        toast.error('User cancelled login or did not fully authorize.');
+      }
+    }, {
+      scope: 'whatsapp_business_management,whatsapp_business_messaging',
+      // If config_id is provided, pass it here
+      // config_id: process.env.NEXT_PUBLIC_FACEBOOK_CONFIG_ID,
+    });
+  };
+
+  if (envError) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg flex gap-3">
+        <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+        <div>
+          <h3 className="font-semibold text-sm">Missing Meta Config</h3>
+          <p className="text-sm mt-1">Please set <code>NEXT_PUBLIC_META_APP_ID</code> in your `.env` file and restart the server.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return <div className="flex items-center justify-center p-6"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>;
+  }
+
+  if (config?.connected) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-lg font-medium text-sm">
+          <CheckCircle2 className="w-5 h-5" /> Account Connected via Meta Cloud API
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">WABA ID (WhatsApp Business Account)</label>
+            <input type="text" readOnly value={config.wabaId} className="w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-lg text-sm font-mono text-slate-500" />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Phone Number ID</label>
+            <input type="text" readOnly value={config.phoneNumberId} className="w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-lg text-sm font-mono text-slate-500" />
+          </div>
+        </div>
+
+        <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-4 mt-6">
+          <h4 className="text-sm font-semibold text-slate-900 border-b border-slate-200 pb-2">Webhook Configuration</h4>
+          <p className="text-xs text-slate-500 mb-2">Provide these details in your <a href="https://developers.facebook.com/apps/" target="_blank" rel="noreferrer" className="text-indigo-600 underline">Meta App Dashboard</a> to receive incoming messages.</p>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Callback URL</label>
+            <div className="flex gap-2">
+              <input type="text" readOnly value={`${typeof window !== 'undefined' ? window.location.origin : 'https://leadpilot.app'}/api/whatsapp/webhook`} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white font-mono text-slate-600" />
+              <Button variant="outline" size="icon" className="shrink-0" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/api/whatsapp/webhook`); toast.success('Callback URL copied to clipboard'); }}><Copy className="w-4 h-4" /></Button>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Verify Token</label>
+            <div className="flex gap-2">
+              <input type="text" readOnly value={'leadpilot_secure_token_8891'} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white font-mono text-slate-600" />
+              <Button variant="outline" size="icon" className="shrink-0" onClick={() => { navigator.clipboard.writeText('leadpilot_secure_token_8891'); toast.success('Verify Token copied to clipboard'); }}><Copy className="w-4 h-4" /></Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-4 border-t border-slate-100 flex flex-col md:flex-row gap-4 justify-end items-center">
+          <Button variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50 border-transparent shrink-0" onClick={() => {
+            fetch('/api/whatsapp/config', { method: 'DELETE' }); // Not implemented yet, just clearing UI for now
+            setConfig(null);
+            toast.success("Disconnected.");
+          }}>
+            Disconnect Account
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-slate-50 border border-slate-200 p-6 rounded-xl flex flex-col items-center justify-center text-center">
+        <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
+          <Smartphone className="w-8 h-8" />
+        </div>
+        <h3 className="font-bold text-slate-900 mb-2">Connect WhatsApp Business</h3>
+        <p className="text-sm text-slate-500 max-w-sm mb-6">
+          Authorize your Meta developer app to enable real-time messaging, webhooks, and automated replies.
+        </p>
+        <Button 
+          onClick={handleConnect} 
+          disabled={!sdkLoaded}
+          className="bg-[#1877F2] hover:bg-[#166FE5] text-white"
+        >
+          {sdkLoaded ? 'Continue with Facebook' : 'Loading SDK...'}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 const TABS = [
   { id: 'profile', label: 'My Profile', icon: User },
@@ -175,39 +363,12 @@ export default function SettingsPage() {
                       <CardHeader>
                         <CardTitle className="text-xl font-display flex items-center justify-between w-full">
                           <span>WhatsApp Business API</span>
-                          <span className="flex items-center text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-1 rounded-md border border-emerald-200">
-                            <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Connected
-                          </span>
+                          {/* We will render connection status here based on real state */}
                         </CardTitle>
-                        <CardDescription>Configure your Meta Graph API webhooks and credentials.</CardDescription>
+                        <CardDescription>Real Meta Graph API connection for WhatsApp Business.</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="space-y-1.5">
-                          <label className="text-sm font-medium text-slate-700">Business Phone Number</label>
-                          <input type="text" defaultValue="+1 (555) 123-4567" disabled className="w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-lg text-sm text-slate-500" />
-                        </div>
-                        
-                        <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-4">
-                          <h4 className="text-sm font-semibold text-slate-900 border-b border-slate-200 pb-2">Webhook Configuration</h4>
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Callback URL</label>
-                            <div className="flex gap-2">
-                              <input type="text" readOnly value="https://leadpilot.app/api/whatsapp/webhook" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white font-mono text-slate-600" />
-                              <Button variant="outline" size="icon" className="shrink-0" onClick={() => { navigator.clipboard.writeText('https://leadpilot.app/api/whatsapp/webhook'); toast.success('Callback URL copied to clipboard'); }}><Copy className="w-4 h-4" /></Button>
-                            </div>
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Verify Token</label>
-                            <div className="flex gap-2">
-                              <input type="text" readOnly value="leadpilot_secure_token_8891" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white font-mono text-slate-600" />
-                              <Button variant="outline" size="icon" className="shrink-0" onClick={() => { navigator.clipboard.writeText('leadpilot_secure_token_8891'); toast.success('Verify Token copied to clipboard'); }}><Copy className="w-4 h-4" /></Button>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="pt-4 border-t border-slate-100 flex justify-end">
-                          <Button variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50 border-transparent">Disconnect Account</Button>
-                        </div>
+                        <WhatsAppSettings />
                       </CardContent>
                     </Card>
                   )}

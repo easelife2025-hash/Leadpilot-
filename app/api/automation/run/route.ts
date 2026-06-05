@@ -88,17 +88,18 @@ Generate ONLY the exact message you would send via WhatsApp. No conversational f
         const generatedMessage = response.text?.trim();
 
         if (generatedMessage) {
-          // Generate simulated "Send" event
-          
-          // 1. Store the sent message in subcollection
-          const messageRef = collection(db, 'leads', phoneNumber, 'messages');
-          await addDoc(messageRef, {
-            text: generatedMessage,
-            from: "Automated System",
-            type: 'outbound',
-            timestamp: serverTimestamp(),
-            automationRule: ruleToRun
+          // Send actual message via WhatsApp Cloud API
+          const API_URL = new URL('/api/whatsapp/send', req.url).toString();
+          const sendRes = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to: phoneNumber, text: generatedMessage })
           });
+          
+          if (!sendRes.ok) {
+            console.error(`Failed to send automated message to ${phoneNumber}`);
+            continue;
+          }
 
           // 2. Add an internal note about the automation
           const currentNotes = lead.notes || [];
