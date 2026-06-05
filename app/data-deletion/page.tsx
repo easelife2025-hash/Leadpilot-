@@ -10,10 +10,10 @@ export default function DataDeletion() {
           <p>If you want to delete your activities for LeadPilot, you can remove your information by following these steps:</p>
           
           <ol className="list-decimal pl-6 space-y-2 mt-4">
-            <li>Go to your Facebook Account's Setting & Privacy. Click "Settings".</li>
-            <li>Look for "Apps and Websites" and you will see all of the apps and websites you linked with your Facebook.</li>
-            <li>Search and Click "LeadPilot" in the search bar.</li>
-            <li>Scroll and click "Remove".</li>
+            <li>Go to your Facebook Account&apos;s Setting & Privacy. Click &quot;Settings&quot;.</li>
+            <li>Look for &quot;Apps and Websites&quot; and you will see all of the apps and websites you linked with your Facebook.</li>
+            <li>Search and Click &quot;LeadPilot&quot; in the search bar.</li>
+            <li>Scroll and click &quot;Remove&quot;.</li>
             <li>Congratulations, you have successfully removed your app activities.</li>
           </ol>
         </div>

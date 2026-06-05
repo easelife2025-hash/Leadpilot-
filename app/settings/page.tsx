@@ -11,6 +11,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
 
 // Keep window.FB typing simple
 declare global {
@@ -223,6 +226,17 @@ function Toggle({ checked, onChange }: { checked: boolean, onChange: (val: boole
 }
 
 export default function SettingsPage() {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/');
+    } catch (error) {
+      console.error('Failed to log out', error);
+    }
+  };
+
   const [activeTab, setActiveTab] = useState('profile');
   const [showApiKey, setShowApiKey] = useState(false);
   
@@ -263,7 +277,10 @@ export default function SettingsPage() {
         </nav>
 
         <div className="p-4 border-t border-slate-200 bg-slate-50/50">
-          <button className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg font-medium transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg font-medium transition-colors"
+          >
             <LogOut className="w-5 h-5 mr-3" />
             Logout
           </button>
@@ -437,7 +454,7 @@ export default function SettingsPage() {
                               <div className="flex items-center justify-between">
                                 <div>
                                   <p className="font-medium text-slate-900 text-sm">Hot Lead Interacted</p>
-                                  <p className="text-slate-500 text-xs mt-0.5">Alert me instantly when AI scores a lead as "Hot".</p>
+                                  <p className="text-slate-500 text-xs mt-0.5">Alert me instantly when AI scores a lead as &quot;Hot&quot;.</p>
                                 </div>
                                 <Toggle checked={notifHot} onChange={setNotifHot} />
                               </div>

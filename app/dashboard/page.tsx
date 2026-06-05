@@ -15,7 +15,22 @@ import { collection, onSnapshot, query, orderBy, limit, Timestamp } from 'fireba
 import { Skeleton } from '@/components/ui/skeleton';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
+
 export default function DashboardPage() {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/');
+    } catch (error) {
+      console.error('Failed to log out', error);
+    }
+  };
+
   const [leads, setLeads] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -93,7 +108,10 @@ export default function DashboardPage() {
         </nav>
 
         <div className="p-4 border-t border-slate-200 bg-slate-50/50">
-          <button className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg font-medium transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg font-medium transition-colors"
+          >
             <LogOut className="w-5 h-5 mr-3" />
             Logout
           </button>
@@ -324,12 +342,12 @@ export default function DashboardPage() {
                                   {lead.leadScore === 'Hot' && <span className="px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded bg-orange-100 text-orange-600">Hot Intent</span>}
                                   {lead.leadScore === 'Warm' && <span className="px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded bg-yellow-100 text-yellow-700">Warm</span>}
                                 </div>
-                                <p className="text-sm text-slate-600 line-clamp-1 mb-2">"{lead.lastMessage}"</p>
+                                <p className="text-sm text-slate-600 line-clamp-1 mb-2">&quot;{lead.lastMessage}&quot;</p>
                                 <div className="flex items-start gap-2 bg-indigo-50/50 p-2.5 rounded-lg border border-indigo-50">
                                    <Sparkles className="w-3.5 h-3.5 text-indigo-500 mt-0.5 flex-shrink-0" />
                                    <div className="text-xs text-indigo-900">
                                      <span className="font-semibold block mb-0.5">Suggested Action: {lead.nextAction || 'Reply promptly'}</span>
-                                     <span className="opacity-80 italic line-clamp-1">"{lead.suggestedFollowUp || 'Hello! How can I help you today?'}"</span>
+                                     <span className="opacity-80 italic line-clamp-1">&quot;{lead.suggestedFollowUp || 'Hello! How can I help you today?'}&quot;</span>
                                    </div>
                                 </div>
                               </div>

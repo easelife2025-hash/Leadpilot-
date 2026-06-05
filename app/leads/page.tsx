@@ -15,7 +15,22 @@ import { collection, onSnapshot, query, orderBy, getDocs, addDoc, serverTimestam
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
+import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
+
 export default function LeadsPage() {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/');
+    } catch (error) {
+      console.error('Failed to log out', error);
+    }
+  };
+
   const [leads, setLeads] = useState<any[]>([]);
   const [filteredLeads, setFilteredLeads] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -129,7 +144,10 @@ export default function LeadsPage() {
         </nav>
 
         <div className="p-4 border-t border-slate-200 bg-slate-50/50">
-          <button className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg font-medium transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg font-medium transition-colors"
+          >
             <LogOut className="w-5 h-5 mr-3" />
             Logout
           </button>

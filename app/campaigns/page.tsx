@@ -12,6 +12,10 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
+import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
+
 const AUTOMATION_RULES = [
   { id: 1, name: 'Day 3 Reminder', trigger: '3 days inactive', intent: 'Gentle check-in', status: 'active', color: 'bg-blue-500' },
   { id: 2, name: 'Day 7 Follow-up', trigger: '7 days inactive', intent: 'Address objections, provide value', status: 'active', color: 'bg-indigo-500' },
@@ -20,6 +24,17 @@ const AUTOMATION_RULES = [
 ];
 
 export default function CampaignsPage() {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/');
+    } catch (error) {
+      console.error('Failed to log out', error);
+    }
+  };
+
   const [isRunning, setIsRunning] = useState(false);
   const [lastRun, setLastRun] = useState<string | null>(null);
 
@@ -72,7 +87,10 @@ export default function CampaignsPage() {
         </nav>
 
         <div className="p-4 border-t border-slate-200 bg-slate-50/50">
-          <button className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg font-medium transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg font-medium transition-colors"
+          >
             <LogOut className="w-5 h-5 mr-3" />
             Logout
           </button>

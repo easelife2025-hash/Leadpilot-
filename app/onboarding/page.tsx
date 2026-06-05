@@ -63,6 +63,7 @@ export default function OnboardingPage() {
     if (!loading && user && currentStep === 1) {
       handleNext(2);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loading, currentStep, hasInitializedUrl]);
 
   useEffect(() => {
@@ -76,6 +77,7 @@ export default function OnboardingPage() {
       setIsConnected(true);
       handleNext(3);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, direction, hasInitializedUrl]);
 
   const handleNext = (targetStep: number) => {
@@ -390,7 +392,7 @@ export default function OnboardingPage() {
                   </div>
                   <CardTitle className="text-2xl font-bold font-display">Import your first leads</CardTitle>
                   <CardDescription className="text-slate-500 font-medium px-4">
-                    You're all set! Let's populate your dashboard by bringing in your contacts.
+                    You&apos;re all set! Let&apos;s populate your dashboard by bringing in your contacts.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6 text-center">
