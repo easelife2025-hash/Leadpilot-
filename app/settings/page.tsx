@@ -28,6 +28,12 @@ function WhatsAppSettings() {
   const [config, setConfig] = useState<any>(null);
   const [sdkLoaded, setSdkLoaded] = useState(false);
   const [envError, setEnvError] = useState(false);
+  const [showManual, setShowManual] = useState(false);
+  const [manualForm, setManualForm] = useState({
+    accessToken: '',
+    wabaId: '',
+    phoneNumberId: ''
+  });
 
   useEffect(() => {
     // 1. Fetch current config
@@ -115,6 +121,33 @@ function WhatsAppSettings() {
     });
   };
 
+  const handleManualSave = () => {
+    if (!manualForm.accessToken || !manualForm.wabaId || !manualForm.phoneNumberId) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+    setLoading(true);
+    fetch('/api/whatsapp/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(manualForm)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) {
+        toast.error(data.error);
+      } else {
+        toast.success("Successfully saved manual config!");
+        setConfig({ connected: true, wabaId: manualForm.wabaId, phoneNumberId: manualForm.phoneNumberId });
+      }
+      setLoading(false);
+    })
+    .catch(() => {
+      toast.error("Failed to save config.");
+      setLoading(false);
+    });
+  };
+
   if (envError) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg flex gap-3">
@@ -183,13 +216,24 @@ function WhatsAppSettings() {
 
   return (
     <div className="space-y-6">
+      <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg text-sm text-yellow-900">
+        <div className="font-semibold flex items-center gap-2 mb-2">
+          <AlertCircle className="w-4 h-4" />
+          Testing on AI Studio or Mobile?
+        </div>
+        <p className="opacity-90">
+          The Facebook Login popup may be blocked or fail to close if you are previewing inside the AI Studio frame or on some mobile browsers. 
+          <strong> Please click &quot;Open in new window&quot; (top right of the builder) before connecting.</strong> Alternatively, use the Manual Setup below.
+        </p>
+      </div>
+
       <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg text-sm text-blue-900">
         <div className="font-semibold flex items-center gap-2 mb-2">
           <AlertCircle className="w-4 h-4" />
           Required Meta App Configuration
         </div>
         <div className="space-y-2 opacity-90">
-          <p>Before connecting, please configure the following in your <a href="https://developers.facebook.com/apps/" target="_blank" rel="noreferrer" className="underline font-medium hover:text-blue-800">Meta App Dashboard</a>:</p>
+          <p>Before connecting with Facebook, please configure the following in your <a href="https://developers.facebook.com/apps/" target="_blank" rel="noreferrer" className="underline font-medium hover:text-blue-800">Meta App Dashboard</a>:</p>
           <ul className="list-disc pl-5 space-y-1">
              <li>Navigate to <b>App Settings &gt; Basic</b> and add <code className="bg-blue-100 px-1 py-0.5 rounded text-blue-800 select-all">{typeof window !== 'undefined' ? window.location.origin : 'https://leadpilot.app'}</code> to <b>App Domains</b>.</li>
              <li>Navigate to <b>Facebook Login &gt; Settings</b> and toggle <b>Login with the JavaScript SDK</b> to <b>Yes</b>.</li>
@@ -198,22 +242,59 @@ function WhatsAppSettings() {
         </div>
       </div>
 
-      <div className="bg-slate-50 border border-slate-200 p-6 rounded-xl flex flex-col items-center justify-center text-center">
-        <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
-          <Smartphone className="w-8 h-8" />
+      {!showManual ? (
+        <div className="bg-slate-50 border border-slate-200 p-6 rounded-xl flex flex-col items-center justify-center text-center">
+          <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
+            <Smartphone className="w-8 h-8" />
+          </div>
+          <h3 className="font-bold text-slate-900 mb-2">Connect WhatsApp Business</h3>
+          <p className="text-sm text-slate-500 max-w-sm mb-6">
+            Authorize your Meta developer app to enable real-time messaging, webhooks, and automated replies.
+          </p>
+          <div className="space-y-4 w-full max-w-xs flex flex-col">
+            <Button 
+              onClick={handleConnect} 
+              disabled={!sdkLoaded}
+              className="bg-[#1877F2] hover:bg-[#166FE5] text-white w-full"
+            >
+              {sdkLoaded ? 'Continue with Facebook' : 'Loading SDK...'}
+            </Button>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-300" /></div>
+              <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-50 px-2 text-slate-500 font-medium">Or</span></div>
+            </div>
+            <Button variant="outline" onClick={() => setShowManual(true)} className="w-full">
+              Manual Setup (Tokens)
+            </Button>
+          </div>
         </div>
-        <h3 className="font-bold text-slate-900 mb-2">Connect WhatsApp Business</h3>
-        <p className="text-sm text-slate-500 max-w-sm mb-6">
-          Authorize your Meta developer app to enable real-time messaging, webhooks, and automated replies.
-        </p>
-        <Button 
-          onClick={handleConnect} 
-          disabled={!sdkLoaded}
-          className="bg-[#1877F2] hover:bg-[#166FE5] text-white"
-        >
-          {sdkLoaded ? 'Continue with Facebook' : 'Loading SDK...'}
-        </Button>
-      </div>
+      ) : (
+        <div className="bg-slate-50 border border-slate-200 p-6 rounded-xl space-y-4">
+           <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-2">
+             <h3 className="font-bold text-slate-900">Manual Configuration</h3>
+             <Button variant="ghost" size="sm" onClick={() => setShowManual(false)}>Cancel</Button>
+           </div>
+           <p className="text-sm text-slate-500">Paste your Temporary Access Token and IDs from the WhatsApp &gt; Getting Started page in the Meta Dashboard.</p>
+           
+           <div className="space-y-3">
+             <div>
+               <label className="text-xs font-medium text-slate-700">Access Token</label>
+               <input type="password" value={manualForm.accessToken} onChange={e => setManualForm(prev => ({...prev, accessToken: e.target.value}))} className="w-full px-3 py-2 border border-slate-300 rounded text-sm mt-1" placeholder="EAAB..." />
+             </div>
+             <div>
+               <label className="text-xs font-medium text-slate-700">Phone Number ID</label>
+               <input type="text" value={manualForm.phoneNumberId} onChange={e => setManualForm(prev => ({...prev, phoneNumberId: e.target.value}))} className="w-full px-3 py-2 border border-slate-300 rounded text-sm mt-1" placeholder="1234567890" />
+             </div>
+             <div>
+               <label className="text-xs font-medium text-slate-700">WhatsApp Business Account ID (WABA)</label>
+               <input type="text" value={manualForm.wabaId} onChange={e => setManualForm(prev => ({...prev, wabaId: e.target.value}))} className="w-full px-3 py-2 border border-slate-300 rounded text-sm mt-1" placeholder="0987654321" />
+             </div>
+             <Button className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white" onClick={handleManualSave}>
+               Save Configuration
+             </Button>
+           </div>
+        </div>
+      )}
     </div>
   );
 }
