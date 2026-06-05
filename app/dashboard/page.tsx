@@ -12,10 +12,8 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy, limit, Timestamp } from 'firebase/firestore';
-import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer, BarChart, Bar 
-} from 'recharts';
+import { Skeleton } from '@/components/ui/skeleton';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function DashboardPage() {
   const [leads, setLeads] = useState<any[]>([]);
@@ -88,10 +86,10 @@ export default function DashboardPage() {
             <Zap className="w-5 h-5 mr-3" />
             Campaigns
           </Link>
-          <button className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
+          <Link href="/settings" className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
             <Settings className="w-5 h-5 mr-3" />
             Settings
-          </button>
+          </Link>
         </nav>
 
         <div className="p-4 border-t border-slate-200 bg-slate-50/50">
@@ -129,8 +127,17 @@ export default function DashboardPage() {
                   <Users className="w-4 h-4 text-indigo-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-slate-900">{totalLeads}</div>
-                  <p className="text-xs text-slate-500 mt-1 flex items-center"><TrendingUp className="w-3 h-3 mr-1 text-emerald-500" /> +12% this week</p>
+                  {isLoading ? (
+                    <div className="space-y-2">
+                       <Skeleton className="h-8 w-[60px]" />
+                       <Skeleton className="h-4 w-[100px]" />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-3xl font-bold text-slate-900">{totalLeads}</div>
+                      <p className="text-xs text-slate-500 mt-1 flex items-center"><TrendingUp className="w-3 h-3 mr-1 text-emerald-500" /> +12% this week</p>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -145,8 +152,17 @@ export default function DashboardPage() {
                   <Flame className="w-4 h-4 text-orange-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-slate-900">{hotLeads}</div>
-                  <p className="text-xs text-orange-600 mt-1 font-medium bg-orange-50 w-fit px-1.5 py-0.5 rounded">High Intent detected</p>
+                  {isLoading ? (
+                    <div className="space-y-2">
+                       <Skeleton className="h-8 w-[60px]" />
+                       <Skeleton className="h-4 w-[100px]" />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-3xl font-bold text-slate-900">{hotLeads}</div>
+                      <p className="text-xs text-orange-600 mt-1 font-medium bg-orange-50 w-fit px-1.5 py-0.5 rounded">High Intent detected</p>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -158,8 +174,17 @@ export default function DashboardPage() {
                   <Clock className="w-4 h-4 text-blue-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-slate-900">{followUpsDue}</div>
-                  <p className="text-xs text-slate-500 mt-1">Require action today</p>
+                  {isLoading ? (
+                    <div className="space-y-2">
+                       <Skeleton className="h-8 w-[60px]" />
+                       <Skeleton className="h-4 w-[100px]" />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-3xl font-bold text-slate-900">{followUpsDue}</div>
+                      <p className="text-xs text-slate-500 mt-1">Require action today</p>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -171,8 +196,17 @@ export default function DashboardPage() {
                   <DollarSign className="w-4 h-4 text-emerald-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-slate-900">${potentialRevenue.toLocaleString()}</div>
-                  <p className="text-xs text-slate-500 mt-1">Based on lead scores</p>
+                  {isLoading ? (
+                    <div className="space-y-2">
+                       <Skeleton className="h-8 w-[80px]" />
+                       <Skeleton className="h-4 w-[100px]" />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-3xl font-bold text-slate-900">${potentialRevenue.toLocaleString()}</div>
+                      <p className="text-xs text-slate-500 mt-1">Based on lead scores</p>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -184,8 +218,17 @@ export default function DashboardPage() {
                   <Activity className="w-4 h-4 text-purple-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-slate-900">{recoveredLeads}</div>
-                  <p className="text-xs text-slate-500 mt-1">Re-engaged past 30d</p>
+                  {isLoading ? (
+                    <div className="space-y-2">
+                       <Skeleton className="h-8 w-[60px]" />
+                       <Skeleton className="h-4 w-[100px]" />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-3xl font-bold text-slate-900">{recoveredLeads}</div>
+                      <p className="text-xs text-slate-500 mt-1">Re-engaged past 30d</p>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -243,7 +286,20 @@ export default function DashboardPage() {
                     <Button variant="outline" className="hidden sm:flex text-sm py-1.5 px-3">View All</Button>
                   </CardHeader>
                   <CardContent>
-                    {leads.length === 0 ? (
+                    {isLoading ? (
+                      <div className="space-y-4 pt-4">
+                         {[1, 2, 3].map((i) => (
+                           <div key={i} className="flex gap-4 p-4 border border-slate-100 rounded-xl">
+                             <div className="flex-1 space-y-2">
+                               <Skeleton className="h-5 w-1/3" />
+                               <Skeleton className="h-4 w-2/3" />
+                               <Skeleton className="h-10 w-full rounded-lg mt-2" />
+                             </div>
+                             <Skeleton className="h-9 w-24 rounded-md" />
+                           </div>
+                         ))}
+                      </div>
+                    ) : leads.length === 0 ? (
                        <div className="text-center py-8">
                          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 mb-4">
                            <MessageSquare className="w-6 h-6 text-slate-400" />
@@ -303,7 +359,16 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-6">
-                      {leads.length === 0 ? (
+                      {isLoading ? (
+                        <div className="space-y-6 pt-4">
+                          {[1, 2, 3, 4].map((i) => (
+                           <div key={`sk-feed-${i}`} className="pl-6 border-l-2 border-slate-100 pb-2">
+                             <Skeleton className="h-4 w-1/2 mb-2" />
+                             <Skeleton className="h-12 w-full rounded-lg" />
+                           </div>
+                          ))}
+                        </div>
+                      ) : leads.length === 0 ? (
                          <div className="text-center py-6">
                             <p className="text-sm text-slate-400">Activity feed is empty</p>
                          </div>

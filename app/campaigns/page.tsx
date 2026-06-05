@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 const AUTOMATION_RULES = [
   { id: 1, name: 'Day 3 Reminder', trigger: '3 days inactive', intent: 'Gentle check-in', status: 'active', color: 'bg-blue-500' },
@@ -27,10 +28,15 @@ export default function CampaignsPage() {
     try {
       const res = await fetch('/api/automation/run', { method: 'POST' });
       if (res.ok) {
+        const data = await res.json();
         setLastRun(new Date().toLocaleTimeString());
+        toast.success(`Automation run complete! ${data.actionsTaken} actions taken.`);
+      } else {
+        toast.error('Failed to run automation');
       }
     } catch (e) {
       console.error(e);
+      toast.error('Failed to run automation');
     }
     setIsRunning(false);
   };
@@ -59,10 +65,10 @@ export default function CampaignsPage() {
             <Zap className="w-5 h-5 mr-3" />
             Campaigns
           </Link>
-          <button className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
+          <Link href="/settings" className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
             <Settings className="w-5 h-5 mr-3" />
             Settings
-          </button>
+          </Link>
         </nav>
 
         <div className="p-4 border-t border-slate-200 bg-slate-50/50">

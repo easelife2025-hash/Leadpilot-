@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy, getDocs, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<any[]>([]);
@@ -71,8 +73,10 @@ export default function LeadsPage() {
     try {
       const leadRef = doc(db, 'leads', selectedLead.id);
       await updateDoc(leadRef, { status, updatedAt: serverTimestamp() });
+      toast.success(`Status updated to ${status}`);
     } catch (error) {
       console.error(error);
+      toast.error('Failed to update status');
     }
   };
 
@@ -87,8 +91,10 @@ export default function LeadsPage() {
         updatedAt: serverTimestamp() 
       });
       setLeadNotes('');
+      toast.success('Note added');
     } catch (error) {
       console.error(error);
+      toast.error('Failed to add note');
     }
   };
 
@@ -116,10 +122,10 @@ export default function LeadsPage() {
             <Zap className="w-5 h-5 mr-3" />
             Campaigns
           </Link>
-          <button className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
+          <Link href="/settings" className="flex items-center w-full px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors">
             <Settings className="w-5 h-5 mr-3" />
             Settings
-          </button>
+          </Link>
         </nav>
 
         <div className="p-4 border-t border-slate-200 bg-slate-50/50">
@@ -164,7 +170,17 @@ export default function LeadsPage() {
           {/* Left Pane: Leads List */}
           <div className="w-[350px] border-r border-slate-200 bg-white flex flex-col overflow-y-auto">
             {isLoading ? (
-              <div className="p-8 text-center text-slate-500">Loading leads...</div>
+              <div className="p-4 space-y-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex flex-col gap-2 p-2 pb-4 border-b border-slate-50 last:border-0">
+                    <div className="flex justify-between items-start">
+                      <Skeleton className="h-5 w-1/2" />
+                      <Skeleton className="h-4 w-12" />
+                    </div>
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                ))}
+              </div>
             ) : filteredLeads.length === 0 ? (
               <div className="p-8 text-center text-slate-500">No leads found</div>
             ) : (

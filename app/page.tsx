@@ -14,12 +14,15 @@ export default function Home() {
         
         <h1 className="text-5xl font-bold font-display text-slate-900 tracking-tight">LeadPilot AI</h1>
         <p className="text-xl text-slate-600 leading-relaxed font-medium">
-          We've successfully engaged system recovery. <br/> The core flow is active again.
+          Automate your WhatsApp lead engagement.<br/> Qualify faster, respond instantly, close more deals.
         </p>
         
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/onboarding" className="inline-flex items-center px-8 py-4 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-600/20">
-            Go to Onboarding <ArrowRight className="w-5 h-5 ml-2" />
+            Get Started <ArrowRight className="w-5 h-5 ml-2" />
+          </Link>
+          <Link href="/dashboard" className="inline-flex items-center px-8 py-4 rounded-xl bg-white text-slate-700 font-bold hover:bg-slate-50 transition border border-slate-200 shadow-sm">
+            Go to Dashboard
           </Link>
         </div>
       </div>
