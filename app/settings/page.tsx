@@ -12,8 +12,9 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 // Keep window.FB typing simple
 declare global {
@@ -37,18 +38,22 @@ function WhatsAppSettings() {
 
   useEffect(() => {
     // 1. Fetch current config
-    fetch('/api/whatsapp/config')
-      .then(res => res.json())
-      .then(data => {
-        if (data.connected) {
-          setConfig(data);
+    const fetchConfig = async () => {
+      try {
+        const configDoc = await getDoc(doc(db, 'settings', 'whatsapp'));
+        if (configDoc.exists()) {
+          const data = configDoc.data();
+          if (data.connected) {
+            setConfig(data);
+          }
         }
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error(err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+    fetchConfig();
 
     // 2. Load FB SDK
     const appId = process.env.NEXT_PUBLIC_META_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
@@ -121,31 +126,29 @@ function WhatsAppSettings() {
     });
   };
 
-  const handleManualSave = () => {
+  const handleManualSave = async () => {
     if (!manualForm.accessToken || !manualForm.wabaId || !manualForm.phoneNumberId) {
       toast.error('Please fill in all fields');
       return;
     }
     setLoading(true);
-    fetch('/api/whatsapp/config', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(manualForm)
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.error) {
-        toast.error(data.error);
-      } else {
-        toast.success("Successfully saved manual config!");
-        setConfig({ connected: true, wabaId: manualForm.wabaId, phoneNumberId: manualForm.phoneNumberId });
-      }
-      setLoading(false);
-    })
-    .catch(() => {
+    
+    try {
+      await setDoc(doc(db, 'settings', 'whatsapp'), {
+        accessToken: manualForm.accessToken,
+        wabaId: manualForm.wabaId,
+        phoneNumberId: manualForm.phoneNumberId,
+        connected: true,
+        updatedAt: new Date()
+      });
+      toast.success("Successfully saved manual config!");
+      setConfig({ connected: true, wabaId: manualForm.wabaId, phoneNumberId: manualForm.phoneNumberId });
+    } catch (error) {
+      console.error(error);
       toast.error("Failed to save config.");
+    } finally {
       setLoading(false);
-    });
+    }
   };
 
   if (envError) {
