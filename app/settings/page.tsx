@@ -54,72 +54,115 @@ function WhatsAppSettings() {
     fetchConfig();
 
     // Load FB SDK
-    const appId = process.env.NEXT_PUBLIC_META_APP_ID || "1234567890"; // Fallback to prevent crash
+    const appId = process.env.NEXT_PUBLIC_META_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID; 
 
     if (window.FB) {
       setSdkLoaded(true);
       return;
     }
 
-    window.fbAsyncInit = function() {
-      window.FB.init({
-        appId            : appId,
-        autoLogAppEvents : true,
-        xfbml            : true,
-        version          : 'v19.0'
-      });
-      setSdkLoaded(true);
-    };
+    if (appId) {
+      window.fbAsyncInit = function() {
+        window.FB.init({
+          appId            : appId,
+          autoLogAppEvents : true,
+          xfbml            : true,
+          version          : 'v19.0'
+        });
+        setSdkLoaded(true);
+      };
 
-    (function(d, s, id) {
-      var js, fjs = d.getElementsByTagName(s)[0];
-      if (d.getElementById(id)) return;
-      js = d.createElement(s) as HTMLScriptElement; js.id = id;
-      js.src = "https://connect.facebook.net/en_US/sdk.js";
-      fjs.parentNode?.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));
+      (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s) as HTMLScriptElement; js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode?.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));
+    }
   }, []);
 
   const handleConnect = () => {
+    const appId = process.env.NEXT_PUBLIC_META_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+    const configId = process.env.NEXT_PUBLIC_FACEBOOK_CONFIG_ID;
+    
+    if (!appId) {
+      toast.error('The SaaS operator has not configured the Meta App ID yet.');
+      return;
+    }
+
     if (!window.FB) {
       toast.error('Connection service is still loading, please wait.');
       return;
     }
 
-    // Attempting Embedded Signup Login Form
-    window.FB.login((response: any) => {
-      if (response.authResponse) {
-        const accessToken = response.authResponse.accessToken;
-        setLoading(true);
-        
-        // In a real implementation we would fetch the WABA ID from Meta's Graph API here using the token
-        // For now, we will simulate a successful handshake and save to Firestore
-        setTimeout(async () => {
-          try {
-            const setupData = {
-              accessToken,
-              wabaId: 'mock_waba_' + Math.floor(Math.random()*10000),
-              phoneNumberId: 'mock_phone_' + Math.floor(Math.random()*10000),
-              connected: true,
-              updatedAt: new Date()
-            };
-            await setDoc(doc(db, 'settings', 'whatsapp'), setupData);
-            setConfig(setupData);
-            toast.success("WhatsApp Connected Successfully");
-          } catch(err) {
-            toast.error("Connected to Meta, but failed to save configuration locally.");
-          } finally {
-            setLoading(false);
-          }
-        }, 1500);
-
-      } else {
-        toast.error('Embedded Signup was cancelled.');
-      }
-    }, {
+    const loginOptions: any = {
       scope: 'whatsapp_business_management,whatsapp_business_messaging',
       extras: { setup: {} }
-    });
+    };
+
+    // If utilizing advanced configuration for Embedded Signup
+    if (configId) {
+      loginOptions.config_id = configId;
+      loginOptions.response_type = 'code';
+      loginOptions.override_default_response_type = true;
+    } else {
+      // Fallback for standard OAuth token flow (testing without config_id)
+      loginOptions.response_type = 'token';
+    }
+
+    // Launch Meta Embedded Signup Login Form
+    window.FB.login((response: any) => {
+      if (response.authResponse) {
+        const payload = configId 
+          ? { code: response.authResponse.code } 
+          : { accessToken: response.authResponse.accessToken };
+          
+        setLoading(true);
+        const toastId = toast.loading('Connecting WhatsApp Business...', { duration: 10000 });
+        
+        // Exchange token or code with backend
+        fetch('/api/whatsapp/exchange', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(async data => {
+          if (data.error) {
+            toast.error(data.error, { id: toastId });
+            setLoading(false);
+          } else {
+            // Save to Firestore
+            try {
+              const setupData = {
+                accessToken: data.accessToken || payload.accessToken, 
+                wabaId: data.wabaId,
+                phoneNumberId: data.phoneNumberId,
+                connected: true,
+                updatedAt: new Date()
+              };
+              await setDoc(doc(db, 'settings', 'whatsapp'), setupData);
+              setConfig(setupData);
+              toast.success("WhatsApp Connected Successfully", { id: toastId });
+            } catch(err) {
+              toast.error("Connected to Meta, but failed to save configuration locally.", { id: toastId });
+              console.error("Firestore Error:", err);
+            } finally {
+              setLoading(false);
+            }
+          }
+        })
+        .catch((err) => {
+          console.error("API Exchange Error:", err);
+          toast.error("Failed to authenticate with WhatsApp service. Please try again.", { id: toastId });
+          setLoading(false);
+        });
+
+      } else {
+        toast.error('WhatsApp connection was cancelled or incomplete.');
+      }
+    }, loginOptions);
   };
 
   const handleDisconnect = async () => {

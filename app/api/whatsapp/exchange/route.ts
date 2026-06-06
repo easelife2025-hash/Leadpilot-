@@ -1,20 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
 
 export async function POST(req: NextRequest) {
   try {
-    const { accessToken } = await req.json();
+    const { accessToken, code } = await req.json();
 
-    if (!accessToken) {
-      return NextResponse.json({ error: "Access token is required" }, { status: 400 });
+    if (!accessToken && !code) {
+      return NextResponse.json({ error: "Access token or code is required" }, { status: 400 });
+    }
+
+    let activeToken = accessToken;
+
+    // Optional: Exchange code for token if Embedded Signup with Config ID is used
+    if (code) {
+      const appId = process.env.NEXT_PUBLIC_META_APP_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+      const appSecret = process.env.META_APP_SECRET;
+      if (!appSecret) {
+        return NextResponse.json({ error: "Server is missing META_APP_SECRET for code exchange" }, { status: 500 });
+      }
+
+      // Exchange code for token
+      const tokenExchangeRes = await fetch(
+        `https://graph.facebook.com/v19.0/oauth/access_token?client_id=${appId}&client_secret=${appSecret}&code=${code}`,
+      );
+      const tokenExchangeData = await tokenExchangeRes.json();
+      
+      if (tokenExchangeData.error) {
+        console.error("Token exchange failed:", tokenExchangeData.error);
+        return NextResponse.json({ error: "Failed to exchange code for token" }, { status: 400 });
+      }
+      activeToken = tokenExchangeData.access_token;
     }
 
     // 1. Fetch user debugging info to verify token and get Business accounts
-    // Using standard Graph API points to get WABA and phone numbers
-    // Note: For Embedded Signup, the user grants permissions and we can fetch WABA directly
-    
-    const clientAccountsRes = await fetch(`https://graph.facebook.com/v19.0/me/client_whatsapp_business_accounts?access_token=${accessToken}`);
+    const clientAccountsRes = await fetch(`https://graph.facebook.com/v19.0/me/client_whatsapp_business_accounts?access_token=${activeToken}`);
     const clientAccounts = await clientAccountsRes.json();
     
     if (clientAccounts.error || !clientAccounts.data || clientAccounts.data.length === 0) {
@@ -25,7 +43,7 @@ export async function POST(req: NextRequest) {
     const wabaId = clientAccounts.data[0].id;
 
     // 2. Fetch Phone Numbers for this WABA
-    const phoneRes = await fetch(`https://graph.facebook.com/v19.0/${wabaId}/phone_numbers?access_token=${accessToken}`);
+    const phoneRes = await fetch(`https://graph.facebook.com/v19.0/${wabaId}/phone_numbers?access_token=${activeToken}`);
     const phoneData = await phoneRes.json();
 
     if (phoneData.error || !phoneData.data || phoneData.data.length === 0) {
@@ -35,15 +53,7 @@ export async function POST(req: NextRequest) {
 
     const phoneNumberId = phoneData.data[0].id;
 
-    // 3. Save to Firebase 
-    await setDoc(doc(db, 'settings', 'whatsapp'), {
-      accessToken, // Warning: Short-lived token, usually we should exchange for a system user token in production.
-      wabaId,
-      phoneNumberId,
-      updatedAt: new Date()
-    });
-
-    return NextResponse.json({ success: true, wabaId, phoneNumberId });
+    return NextResponse.json({ success: true, wabaId, phoneNumberId, accessToken: activeToken });
 
   } catch (error) {
     console.error("Exchange error:", error);
